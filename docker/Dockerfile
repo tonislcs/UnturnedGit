@@ -1,16 +1,32 @@
-FROM ubuntu:18.04
+FROM debian:13-slim
 
-LABEL RestoreMonarchy, <admin@restoremonarchy.com>
+LABEL maintainer="RestoreMonarchy <admin@restoremonarchy.com>"
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && \
-    apt upgrade -y && \
-    apt install -y curl unzip wget jq lib32gcc1 lib32stdc++6 libc6 libgl1-mesa-glx libxcursor1 libxrandr2 libc6-dev libgcc-4.8-dev && \
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        unzip \
+        wget \
+        jq \
+        git \
+        lib32gcc-s1 \
+        lib32stdc++6 \
+        libc6 \
+        libc6-i386 \
+        libgl1 \
+        libxcursor1 \
+        libxrandr2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    wget http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u2_amd64.deb && \
+    dpkg -i libssl1.1_*.deb && \
+    rm -f libssl1.1_*.deb && \
     useradd -d /home/container -m container
-
-# Install git for cloning
-RUN apt install -y git
 
 USER container
 ENV  USER container
